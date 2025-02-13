@@ -49,12 +49,6 @@
             word-wrap: break-word;
             max-width: 250px;
         }
-        .price {
-            margin-top: 5px;
-            color: #2d7b2d;
-            font-size: 16px;
-            font-weight: bold;
-        }
         .footer {
             margin-top: 20px;
             font-size: 14px;
@@ -134,7 +128,7 @@
                     document.getElementById('error').textContent = 'Nenhuma imagem encontrada. Verifique a planilha.';
                 }
                 lines.forEach((line, index) => {
-                    const [url, caption, price] = line.split(',').map(item => item.trim());
+                    const [url, caption] = line.split(',').map(item => item.trim());
                     if (url && url.startsWith('http')) {
                         const item = document.createElement('div');
                         item.className = 'gallery-item';
@@ -148,13 +142,8 @@
                         captionText.className = 'caption';
                         captionText.textContent = caption || '';
 
-                        const priceText = document.createElement('div');
-                        priceText.className = 'price';
-                        priceText.textContent = price ? `R$ ${price}` : '';
-
                         item.appendChild(img);
                         item.appendChild(captionText);
-                        item.appendChild(priceText);
                         gallery.appendChild(item);
                     } else if (url === 'BREAK') {
                         const breakElement = document.createElement('div');
