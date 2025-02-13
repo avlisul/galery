@@ -23,6 +23,12 @@
             padding: 20px;
             min-height: 300px;
         }
+        .gallery-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 250px;
+        }
         .gallery img {
             width: 250px;
             height: 250px;
@@ -35,6 +41,20 @@
         .gallery img:hover {
             transform: scale(1.05);
         }
+        .caption {
+            margin-top: 5px;
+            color: #333;
+            font-size: 14px;
+            text-align: center;
+            word-wrap: break-word;
+            max-width: 250px;
+        }
+        .price {
+            margin-top: 5px;
+            color: #2d7b2d;
+            font-size: 16px;
+            font-weight: bold;
+        }
         .footer {
             margin-top: 20px;
             font-size: 14px;
@@ -44,6 +64,44 @@
             color: red;
             margin-top: 20px;
         }
+        .whatsapp-button {
+            margin-top: 30px;
+        }
+        .whatsapp-button a {
+            display: inline-block;
+            padding: 15px 25px;
+            background-color: #25D366;
+            color: white;
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 18px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s;
+        }
+        .whatsapp-button a:hover {
+            background-color: #1DA851;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+        .modal.close {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -51,6 +109,14 @@
     <div class="gallery" id="gallery"></div>
     <div class="error" id="error"></div>
     <div class="footer">Atualizado automaticamente para os clientes do WhatsApp.</div>
+
+    <div class="whatsapp-button">
+        <a href="https://wa.me/SEU_NUMERO_AQUI" target="_blank">Voltar para o WhatsApp</a>
+    </div>
+
+    <div class="modal" id="imageModal" onclick="closeModal()">
+        <img id="modalImg" src="" alt="Imagem em tamanho maior">
+    </div>
 
     <script>
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKE2BL2ne28i_DekjdzmGknygEWqCR34c3E_rhm_STKC5f31b7IvHFpHC3s-VnZx9BQIi69uJ-jLmG/pub?gid=815457042&single=true&output=csv';
@@ -68,15 +134,28 @@
                     document.getElementById('error').textContent = 'Nenhuma imagem encontrada. Verifique a planilha.';
                 }
                 lines.forEach((line, index) => {
-                    const url = line.trim();
+                    const [url, caption, price] = line.split(',').map(item => item.trim());
                     if (url && url.startsWith('http')) {
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+
                         const img = document.createElement('img');
                         img.src = url;
-                        img.alt = `Produto ${index + 1}`;
-                        img.addEventListener('click', () => {
-                            window.open(url, '_blank');
-                        });
-                        gallery.appendChild(img);
+                        img.alt = caption || `Produto ${index + 1}`;
+                        img.addEventListener('click', () => openModal(url));
+
+                        const captionText = document.createElement('div');
+                        captionText.className = 'caption';
+                        captionText.textContent = caption || '';
+
+                        const priceText = document.createElement('div');
+                        priceText.className = 'price';
+                        priceText.textContent = price ? `R$ ${price}` : '';
+
+                        item.appendChild(img);
+                        item.appendChild(captionText);
+                        item.appendChild(priceText);
+                        gallery.appendChild(item);
                     } else if (url === 'BREAK') {
                         const breakElement = document.createElement('div');
                         breakElement.style.flexBasis = '100%';
@@ -87,6 +166,17 @@
             } catch (error) {
                 document.getElementById('error').textContent = 'Erro ao carregar imagens: ' + error.message;
             }
+        }
+
+        function openModal(url) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            modalImg.src = url;
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
         }
 
         loadImages();
