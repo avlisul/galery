@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeria de Produtos</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f0f0;
+            text-align: center;
+        }
+        h1 {
+            margin: 20px 0;
+            color: #333;
+        }
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 15px;
+            padding: 20px;
+            min-height: 300px;
+        }
+        .gallery img {
+            width: 250px;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .gallery img:hover {
+            transform: scale(1.05);
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+        }
+        .error {
+            color: red;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Produtos em Alta</h1>
+    <div class="gallery" id="gallery"></div>
+    <div class="error" id="error"></div>
+    <div class="footer">Atualizado automaticamente para os clientes do WhatsApp.</div>
+
+    <script>
+        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSKE2BL2ne28i_DekjdzmGknygEWqCR34c3E_rhm_STKC5f31b7IvHFpHC3s-VnZx9BQIi69uJ-jLmG/pub?gid=815457042&single=true&output=csv';
+
+        async function loadImages() {
+            try {
+                const response = await fetch(sheetUrl);
+                if (!response.ok) {
+                    throw new Error('Falha ao carregar a planilha. Verifique o link.');
+                }
+                const data = await response.text();
+                const lines = data.split('\n').filter(line => line.trim());
+                const gallery = document.getElementById('gallery');
+                if (lines.length === 0) {
+                    document.getElementById('error').textContent = 'Nenhuma imagem encontrada. Verifique a planilha.';
+                }
+                lines.forEach((line, index) => {
+                    const url = line.trim();
+                    if (url && url.startsWith('http')) {
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = `Produto ${index + 1}`;
+                        img.addEventListener('click', () => {
+                            window.open(url, '_blank');
+                        });
+                        gallery.appendChild(img);
+                    } else if (url === 'BREAK') {
+                        const breakElement = document.createElement('div');
+                        breakElement.style.flexBasis = '100%';
+                        breakElement.style.height = '0';
+                        gallery.appendChild(breakElement);
+                    }
+                });
+            } catch (error) {
+                document.getElementById('error').textContent = 'Erro ao carregar imagens: ' + error.message;
+            }
+        }
+
+        loadImages();
+    </script>
+</body>
+</html>
